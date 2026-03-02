@@ -1,5 +1,4 @@
 import * as p from "@clack/prompts";
-import type { Command } from "commander";
 import type { OpenClawConfig } from "openclaw/plugin-sdk";
 import type { OpikPluginConfig } from "./types.js";
 
@@ -9,7 +8,7 @@ type ConfigDeps = {
 };
 
 type RegisterOpikCliParams = {
-  program: Command;
+  program: any;
 } & ConfigDeps;
 
 /** Opik Cloud host (matches SDK's DEFAULT_HOST_URL). */
@@ -369,7 +368,7 @@ async function runOpikConfigure(deps: ConfigDeps): Promise<void> {
 // Status display
 // ---------------------------------------------------------------------------
 
-function showOpikStatus(deps: ConfigDeps): void {
+export function showOpikStatus(deps: ConfigDeps): void {
   const cfg = deps.loadConfig();
   const entry = getOpikPluginEntry(cfg);
   const opik = entry.config;
