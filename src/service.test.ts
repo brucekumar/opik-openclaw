@@ -173,6 +173,34 @@ describe("opik service", () => {
       });
     });
 
+    test("prefers pluginConfig over legacy top-level config", async () => {
+      const { api } = createApi();
+      const service = createOpikService(api as any, {
+        enabled: true,
+        apiKey: "plugin-key",
+        apiUrl: "https://plugin-opik.example.com",
+        projectName: "plugin-project",
+        workspaceName: "plugin-workspace",
+      });
+
+      await service.start(
+        createServiceContext(true, {
+          enabled: false,
+          apiKey: "legacy-key",
+          apiUrl: "https://legacy-opik.example.com",
+          projectName: "legacy-project",
+          workspaceName: "legacy-workspace",
+        }) as any,
+      );
+
+      expect(mockOpikConstructor).toHaveBeenCalledWith({
+        apiKey: "plugin-key",
+        apiUrl: "https://plugin-opik.example.com",
+        projectName: "plugin-project",
+        workspaceName: "plugin-workspace",
+      });
+    });
+
     test("falls back to env vars for client config", async () => {
       process.env.OPIK_API_KEY = "env-key";
       process.env.OPIK_URL_OVERRIDE = "https://env-opik.example.com";
@@ -666,6 +694,39 @@ describe("opik service", () => {
       // The LLM span is the only one created — no tool span update/end
       // trace.span called once for LLM span only (from llm_input)
       expect(mockTrace.span).toHaveBeenCalledTimes(1);
+    });
+
+    test("falls back when after_tool_call context is missing sessionKey", async () => {
+      const { api, hooks } = createApi();
+      const mockToolSpan = opikState.createMockSpan();
+      const mockTrace = opikState.createMockTrace();
+      const mockLlmSpan = opikState.createMockSpan();
+      mockTrace.span.mockReturnValueOnce(mockLlmSpan).mockReturnValueOnce(mockToolSpan);
+      mockTraceFn.mockReturnValue(mockTrace);
+
+      const service = createOpikService(api as any);
+      const ctx = createServiceContext() as any;
+      await service.start(ctx);
+
+      invokeHook(hooks, "llm_input", { model: "m", provider: "p", prompt: "" }, agentCtx("s1"));
+      invokeHook(hooks, "before_tool_call", { toolName: "search", params: {} }, toolCtx("s1"));
+
+      invokeHook(
+        hooks,
+        "after_tool_call",
+        {
+          toolName: "search",
+          result: { ok: true },
+        },
+        toolCtx(undefined),
+      );
+
+      expect(mockToolSpan.update).toHaveBeenCalledWith({ output: { ok: true } });
+      expect(mockToolSpan.end).toHaveBeenCalledTimes(1);
+      expect(ctx.logger.warn).toHaveBeenCalledTimes(1);
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("after_tool_call missing sessionKey"),
+      );
     });
   });
 
