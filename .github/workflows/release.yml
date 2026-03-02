@@ -92,9 +92,14 @@ jobs:
         run: |
           npm config delete //registry.npmjs.org/:_authToken || true
 
-      - name: Publish to npm with provenance
+      - name: Publish to npm
         if: steps.exists.outputs.already_published == 'false'
-        run: npm publish --provenance --access public
+        run: |
+          if [ "${{ github.event.repository.private }}" = "true" ]; then
+            npm publish --access public
+          else
+            npm publish --provenance --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ""
 
