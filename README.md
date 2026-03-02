@@ -1,7 +1,11 @@
 <h1 align="center" style="border-bottom: none">
   <div>
-    <a href="https://www.comet.com/site/products/opik/">
-      <img alt="Comet Opik logo" src="https://raw.githubusercontent.com/comet-ml/opik-mcp/refs/heads/main/docs/assets/logo-light-mode.svg" width="200" />
+    <a href="https://www.comet.com/site/products/opik/?from=llm&utm_source=opik&utm_medium=github&utm_content=header_img&utm_campaign=opik">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/comet-ml/opik/refs/heads/main/apps/opik-documentation/documentation/static/img/logo-dark-mode.svg">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/comet-ml/opik/refs/heads/main/apps/opik-documentation/documentation/static/img/opik-logo.svg">
+        <img alt="Comet Opik logo" src="https://raw.githubusercontent.com/comet-ml/opik/refs/heads/main/apps/opik-documentation/documentation/static/img/opik-logo.svg" width="200" />
+      </picture>
     </a>
     <br />
     OpenClaw Opik Plugin
@@ -15,38 +19,38 @@ Community plugin for <a href="https://github.com/openclaw/openclaw">OpenClaw</a>
 <div align="center">
 
 [![License](https://img.shields.io/github/license/comet-ml/opik-openclaw)](https://github.com/comet-ml/opik-openclaw/blob/main/LICENSE)
-[![npm version](https://img.shields.io/npm/v/@comet-ml/openclaw-opik)](https://www.npmjs.com/package/@comet-ml/openclaw-opik)
+![npm status](https://img.shields.io/badge/npm-pending%20release-lightgrey)
 
 </div>
 
-## Why this plugin
+## What this plugin gives you
 
-`@comet-ml/openclaw-opik` adds native Opik tracing for OpenClaw workflows:
+`@comet-ml/openclaw-opik` adds native Opik tracing for OpenClaw runs:
 
 - LLM request/response spans
-- Tool call spans and outputs
-- Agent lifecycle finalization
-- Token usage and cost metadata
+- tool call spans with inputs, outputs, and errors
+- run-level finalize metadata
+- usage and cost metadata
 
-The plugin runs inside the OpenClaw Gateway process. If Gateway is remote, install/configure the plugin on that host.
+The plugin runs inside the OpenClaw Gateway process. If your gateway is remote, install and configure the plugin on that host.
 
-## Quickstart
+## First run
 
-### 1. Configure from OpenClaw CLI
+### 1. Configure the plugin
 
 ```bash
 openclaw opik configure
 ```
 
-This validates endpoint and credentials and writes plugin-scoped config under `plugins.entries.opik`.
+The setup wizard validates endpoint and credentials, then writes config under `plugins.entries.opik`.
 
-### 2. Check effective configuration
+### 2. Check effective settings
 
 ```bash
 openclaw opik status
 ```
 
-### 3. Verify trace export
+### 3. Send a test message
 
 ```bash
 openclaw gateway run
@@ -57,7 +61,7 @@ Then confirm traces in your Opik project.
 
 ## Configuration
 
-### Plugin-scoped config (recommended)
+### Recommended config shape
 
 ```json
 {
@@ -93,23 +97,28 @@ Then confirm traces in your Opik project.
 | `openclaw opik configure` | Interactive setup wizard |
 | `openclaw opik status` | Print effective Opik configuration |
 
-## Data mapping
+## Event mapping
 
 | OpenClaw event | Opik entity | Notes |
 | --- | --- | --- |
-| `llm_input` | trace + llm span | Creates trace and starts model span |
-| `llm_output` | llm span update/end | Updates usage/output and closes span |
-| `before_tool_call` | tool span start | Captures tool name and input |
-| `after_tool_call` | tool span update/end | Captures result/error and duration |
-| `agent_end` | trace finalize | Consolidates deferred metadata |
+| `llm_input` | trace + llm span | starts trace and llm span |
+| `llm_output` | llm span update/end | writes usage/output and closes span |
+| `before_tool_call` | tool span start | captures tool name + input |
+| `after_tool_call` | tool span update/end | captures output/error + duration |
+| `agent_end` | trace finalize | closes pending spans and trace |
 
-## Known limitations
+## Known limitation
 
-OpenClaw embedded tool handlers can emit `after_tool_call` without `sessionKey` in some paths. This plugin applies a deterministic fallback (active-session map/latest active trace), but concurrent multi-session tool traffic can still mis-correlate a span.
+Some OpenClaw embedded tool paths emit `after_tool_call` without `sessionKey`. This plugin applies a deterministic fallback (active session map/latest active trace), but high-concurrency multi-session workloads can still mis-correlate a tool span.
 
 No OpenClaw core changes are included in this repository.
 
 ## Development
+
+Prerequisites:
+
+- Node.js `>=22.12.0`
+- npm `>=11`
 
 ```bash
 npm ci
@@ -118,6 +127,10 @@ npm run typecheck
 npm run test
 npm run smoke
 ```
+
+## Release status
+
+The npm package name is reserved (`@comet-ml/openclaw-opik`), but public npm publication is intentionally gated.
 
 ## Contributing
 
