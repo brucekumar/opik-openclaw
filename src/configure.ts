@@ -1,6 +1,7 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 import type { OpenClawConfig } from "openclaw/plugin-sdk";
+import type { OpikPluginConfig } from "./types.js";
 
 type ConfigDeps = {
   loadConfig: () => OpenClawConfig;
@@ -17,6 +18,58 @@ const OPIK_CLOUD_HOST = "https://www.comet.com/";
 const DEFAULT_LOCAL_URL = "http://localhost:5173/";
 /** Max URL validation retries (matches SDK's MAX_URL_VALIDATION_RETRIES). */
 const MAX_URL_RETRIES = 3;
+const OPIK_PLUGIN_ID = "opik";
+
+function asObject(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+  return value as Record<string, unknown>;
+}
+
+export function getOpikPluginEntry(cfg: OpenClawConfig): {
+  enabled?: boolean;
+  config: Record<string, unknown>;
+} {
+  const root = asObject(cfg);
+  const plugins = asObject(root.plugins);
+  const entries = asObject(plugins.entries);
+  const entry = asObject(entries[OPIK_PLUGIN_ID]);
+  const config = asObject(entry.config);
+  return {
+    enabled: typeof entry.enabled === "boolean" ? entry.enabled : undefined,
+    config,
+  };
+}
+
+export function setOpikPluginEntry(
+  cfg: OpenClawConfig,
+  config: OpikPluginConfig,
+  enabled = true,
+): OpenClawConfig {
+  const root = asObject(cfg);
+  const plugins = asObject(root.plugins);
+  const entries = asObject(plugins.entries);
+  const existingEntry = asObject(entries[OPIK_PLUGIN_ID]);
+  const nextEntries = {
+    ...entries,
+    [OPIK_PLUGIN_ID]: {
+      ...existingEntry,
+      enabled,
+      config: {
+        ...asObject(existingEntry.config),
+        ...config,
+      },
+    },
+  };
+  return {
+    ...root,
+    plugins: {
+      ...plugins,
+      entries: nextEntries,
+    },
+  } as OpenClawConfig;
+}
 
 // ---------------------------------------------------------------------------
 // URL helpers (mirrors opik SDK api-helpers.ts / urls.ts)
@@ -285,9 +338,9 @@ async function runOpikConfigure(deps: ConfigDeps): Promise<void> {
   // Step 6: Build API URL from host and write config
   const apiUrl = buildOpikApiUrl(host);
   const cfg = deps.loadConfig();
-  const existingOpik = cfg.opik ?? {};
+  const existingOpik = getOpikPluginEntry(cfg).config as OpikPluginConfig;
 
-  const nextOpik = {
+  const nextOpik: OpikPluginConfig = {
     ...existingOpik,
     enabled: true,
     apiUrl,
@@ -296,10 +349,7 @@ async function runOpikConfigure(deps: ConfigDeps): Promise<void> {
     projectName,
   };
 
-  const nextCfg: OpenClawConfig = {
-    ...cfg,
-    opik: nextOpik,
-  };
+  const nextCfg = setOpikPluginEntry(cfg, nextOpik, true);
 
   await deps.writeConfigFile(nextCfg);
 
@@ -321,14 +371,15 @@ async function runOpikConfigure(deps: ConfigDeps): Promise<void> {
 
 function showOpikStatus(deps: ConfigDeps): void {
   const cfg = deps.loadConfig();
-  const opik = cfg.opik as Record<string, unknown> | undefined;
+  const entry = getOpikPluginEntry(cfg);
+  const opik = entry.config;
 
-  if (!opik) {
+  if (entry.enabled === undefined && Object.keys(opik).length === 0) {
     console.log("Opik is not configured. Run: openclaw opik configure");
     return;
   }
 
-  const enabled = !!opik.enabled;
+  const enabled = entry.enabled !== false && opik.enabled !== false;
   const lines = [
     `  Enabled:    ${enabled ? "yes" : "no"}`,
     `  API URL:    ${(opik.apiUrl as string) ?? "(default)"}`,
