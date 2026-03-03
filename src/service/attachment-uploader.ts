@@ -3,6 +3,7 @@ import { basename } from "node:path";
 import type { Opik } from "opik";
 import {
   ATTACHMENT_UPLOAD_PART_SIZE_BYTES,
+  DEFAULT_UPLOADED_ATTACHMENT_CACHE_MAX_KEYS,
   LOCAL_ATTACHMENT_UPLOAD_MAGIC_ID,
 } from "./constants.js";
 import { collectMediaPathsFromUnknown, guessMimeType, resolveEntityId } from "./media.js";
@@ -40,6 +41,7 @@ type AttachmentUploaderDeps = {
   getAttachmentBaseUrl: () => string;
   onWarn: (message: string) => void;
   formatError: (err: unknown) => string;
+  uploadedAttachmentCacheMaxKeys?: number;
 };
 
 export type ScheduledMediaUpload = {
@@ -52,7 +54,23 @@ export type ScheduledMediaUpload = {
 
 export function createAttachmentUploader(deps: AttachmentUploaderDeps) {
   let attachmentQueue: Promise<void> = Promise.resolve();
-  const uploadedAttachmentKeys = new Set<string>();
+  const inFlightAttachmentKeys = new Set<string>();
+  const uploadedAttachmentKeys = new Map<string, number>();
+  const uploadedAttachmentCacheMaxKeys = Math.max(
+    1,
+    Math.floor(deps.uploadedAttachmentCacheMaxKeys ?? DEFAULT_UPLOADED_ATTACHMENT_CACHE_MAX_KEYS),
+  );
+
+  function markUploadedAttachmentKey(key: string): void {
+    uploadedAttachmentKeys.delete(key);
+    uploadedAttachmentKeys.set(key, Date.now());
+
+    while (uploadedAttachmentKeys.size > uploadedAttachmentCacheMaxKeys) {
+      const oldestKey = uploadedAttachmentKeys.keys().next().value as string | undefined;
+      if (!oldestKey) break;
+      uploadedAttachmentKeys.delete(oldestKey);
+    }
+  }
 
   function scheduleAttachmentUpload(job: () => Promise<void>): void {
     attachmentQueue = attachmentQueue.then(job).catch((err: unknown) => {
@@ -71,12 +89,12 @@ export function createAttachmentUploader(deps: AttachmentUploaderDeps) {
     if (!baseClient) return;
 
     const existingKey = `${params.entityType}:${params.entityId}:${params.filePath}`;
-    if (uploadedAttachmentKeys.has(existingKey)) return;
-    uploadedAttachmentKeys.add(existingKey);
+    if (uploadedAttachmentKeys.has(existingKey) || inFlightAttachmentKeys.has(existingKey)) return;
 
     const client = baseClient as OpikWithAttachmentsApi;
     const attachmentsApi = client.api?.attachments;
     if (!attachmentsApi) return;
+    inFlightAttachmentKeys.add(existingKey);
 
     try {
       const stats = await stat(params.filePath);
@@ -87,7 +105,7 @@ export function createAttachmentUploader(deps: AttachmentUploaderDeps) {
       const mimeType = guessMimeType(params.filePath);
       const fileName = basename(params.filePath) || "attachment.bin";
       const partCount = Math.max(1, Math.ceil(totalSize / ATTACHMENT_UPLOAD_PART_SIZE_BYTES));
-      const pathBase64 = Buffer.from(deps.getAttachmentBaseUrl(), "utf8").toString("base64");
+      const pathBase64 = Buffer.from(deps.getAttachmentBaseUrl(), "utf8").toString("base64url");
 
       const started = await attachmentsApi.startMultiPartUpload({
         fileName,
@@ -110,6 +128,7 @@ export function createAttachmentUploader(deps: AttachmentUploaderDeps) {
         if (!localResponse.ok) {
           throw new Error(`local attachment upload failed status=${localResponse.status}`);
         }
+        markUploadedAttachmentKey(existingKey);
         return;
       }
 
@@ -152,11 +171,13 @@ export function createAttachmentUploader(deps: AttachmentUploaderDeps) {
         uploadId: started.uploadId,
         uploadedFileParts: uploadedParts,
       });
+      markUploadedAttachmentKey(existingKey);
     } catch (err) {
-      uploadedAttachmentKeys.delete(existingKey);
       deps.onWarn(
         `opik: attachment upload failed (${params.reason}, entity=${params.entityType}:${params.entityId}, path=${params.filePath}): ${deps.formatError(err)}`,
       );
+    } finally {
+      inFlightAttachmentKeys.delete(existingKey);
     }
   }
 
@@ -188,6 +209,7 @@ export function createAttachmentUploader(deps: AttachmentUploaderDeps) {
   }
 
   function reset(): void {
+    inFlightAttachmentKeys.clear();
     uploadedAttachmentKeys.clear();
   }
 
