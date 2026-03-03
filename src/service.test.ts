@@ -292,6 +292,41 @@ describe("opik service", () => {
       );
     });
 
+    test("sanitizes media image references in llm_input payloads", async () => {
+      const { api, hooks } = createApi();
+      const mockTrace = opikState.createMockTrace();
+      mockTraceFn.mockReturnValue(mockTrace);
+
+      const service = createOpikService(api as any);
+      await service.start(createServiceContext() as any);
+
+      invokeHook(
+        hooks,
+        "llm_input",
+        {
+          model: "gpt-4",
+          provider: "openai",
+          prompt: "send media:https://example.com/image.jpg",
+          systemPrompt: "use media:./image.jpg for docs examples",
+          imagesCount: 0,
+          historyMessages: [
+            {
+              role: "user",
+              content: "example media:/tmp/screenshot.png",
+            },
+          ],
+        },
+        agentCtx("session-1"),
+      );
+
+      const traceInput = mockTraceFn.mock.calls[0][0].input;
+      expect(traceInput.prompt).toBe("send media:<image-ref>");
+      expect(traceInput.systemPrompt).toBe("use media:<image-ref> for docs examples");
+
+      const llmSpanInput = (mockTrace.span.mock.calls[0][0] as any).input;
+      expect(llmSpanInput.historyMessages[0].content).toBe("example media:<image-ref>");
+    });
+
     test("prefers channelId and records trigger metadata when provided", async () => {
       const { api, hooks } = createApi();
       const mockTrace = opikState.createMockTrace();
@@ -680,6 +715,42 @@ describe("opik service", () => {
       );
 
       expect(mockToolSpan.update).toHaveBeenCalledWith({ output: { data: [1, 2, 3] } });
+      expect(mockToolSpan.end).toHaveBeenCalled();
+    });
+
+    test("sanitizes media image references in tool input and output payloads", async () => {
+      const { api, hooks } = createApi();
+      const mockToolSpan = opikState.createMockSpan();
+      const mockTrace = opikState.createMockTrace();
+      const mockLlmSpan = opikState.createMockSpan();
+      mockTrace.span.mockReturnValueOnce(mockLlmSpan).mockReturnValueOnce(mockToolSpan);
+      mockTraceFn.mockReturnValue(mockTrace);
+
+      const service = createOpikService(api as any);
+      await service.start(createServiceContext() as any);
+
+      invokeHook(hooks, "llm_input", { model: "m", provider: "p", prompt: "" }, agentCtx("s1"));
+      invokeHook(
+        hooks,
+        "before_tool_call",
+        { toolName: "search", params: { path: "media:/tmp/image.png" } },
+        toolCtx("s1"),
+      );
+      invokeHook(
+        hooks,
+        "after_tool_call",
+        {
+          toolName: "search",
+          params: { path: "media:https://example.com/image.jpg" },
+          result: { imageRef: "media:./image.jpeg" },
+        },
+        toolCtx("s1"),
+      );
+
+      expect(mockToolSpan.update).toHaveBeenCalledWith({
+        input: { path: "media:<image-ref>" },
+        output: { imageRef: "media:<image-ref>" },
+      });
       expect(mockToolSpan.end).toHaveBeenCalled();
     });
 
