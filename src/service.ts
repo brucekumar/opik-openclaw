@@ -10,6 +10,7 @@ import { registerLlmHooks } from "./service/hooks/llm.js";
 import { registerSubagentHooks } from "./service/hooks/subagent.js";
 import { registerToolHooks } from "./service/hooks/tool.js";
 import {
+  ATTACHMENT_UPLOADS_ENABLED,
   DEFAULT_ATTACHMENT_BASE_URL,
   DEFAULT_FLUSH_RETRY_BASE_DELAY_MS,
   DEFAULT_FLUSH_RETRY_COUNT,
@@ -70,6 +71,7 @@ export function createOpikService(
     getAttachmentBaseUrl: () => attachmentBaseUrl,
     onWarn: (message) => log.warn(message),
     formatError,
+    attachmentsEnabled: ATTACHMENT_UPLOADS_ENABLED,
   });
 
   const exporterMetrics = {
@@ -392,6 +394,24 @@ export function createOpikService(
         safeSpanEnd,
         warn: (message) => log.warn(message),
         formatError,
+      });
+
+      // =====================================================================
+      // Hook: tool_result_persist — sanitize persisted tool messages
+      // =====================================================================
+      api.on("tool_result_persist", (event) => {
+        try {
+          const eventObj = event as Record<string, unknown>;
+          const message = eventObj.message;
+          if (!message || typeof message !== "object") return;
+
+          const sanitizedMessage = sanitizeValueForOpik(message);
+          if (sanitizedMessage !== message) {
+            return { message: sanitizedMessage };
+          }
+        } catch (err) {
+          log.warn(`opik: tool_result_persist failed: ${formatError(err)}`);
+        }
       });
 
       // =====================================================================
