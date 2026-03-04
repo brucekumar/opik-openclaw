@@ -48,12 +48,6 @@ Prerequisites:
 openclaw plugins install @opik/opik-openclaw
 ```
 
-Optional (pin exact version):
-
-```bash
-openclaw plugins install @opik/opik-openclaw@<version> --pin
-```
-
 If the Gateway is already running, restart it after install.
 
 ### 2. Configure the plugin
