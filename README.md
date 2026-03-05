@@ -86,11 +86,13 @@ Then confirm traces in your Opik project.
       "opik-openclaw": {
         "enabled": true,
         "config": {
+          // base configuration
           "enabled": true,
           "apiKey": "your-api-key",
           "apiUrl": "https://www.comet.com/opik/api",
           "projectName": "openclaw",
           "workspaceName": "default",
+          // optional advanced configuration
           "tags": ["openclaw"],
           "toolResultPersistSanitizeEnabled": false,
           "staleTraceCleanupEnabled": true,
