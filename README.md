@@ -8,7 +8,7 @@
       </picture>
     </a>
     <br />
-    OpenClaw Opik Plugin
+    🔭 OpenClaw Opik Observability Plugin
   </div>
 </h1>
 
@@ -21,10 +21,11 @@ Official plugin for <a href="https://github.com/openclaw/openclaw">OpenClaw</a> 
 [![License](https://img.shields.io/github/license/comet-ml/opik-openclaw)](./LICENSE)
 [![npm version](https://img.shields.io/npm/v/%40opik%2Fopik-openclaw)](https://www.npmjs.com/package/@opik/opik-openclaw)
 
+<img src="screenshot.png" alt="Openclaw on Opik Demo"/>
 
 </div>
 
-## What this plugin gives you
+## Why This Plugin
 
 [Opik](https://github.com/comet-ml/opik) is a leading open-source LLM and agent observability, tracing, evaluation and optimization platform.
 `@opik/opik-openclaw` adds native Opik tracing for OpenClaw runs:
